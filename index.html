@@ -20,6 +20,8 @@
 
   .header { background: linear-gradient(#D6EEFF, #FDF6E3); padding: 22px 18px 16px; text-align: center; }
   .eyebrow { font-size: 10px; letter-spacing: 3px; color: #5AAD5E; font-weight: 600; }
+  .langbtn { padding: 7px 18px; border: 1.5px solid #d8cfb8; background: #fff; color: #888; font-size: 13px; font-weight: 700; font-family: var(--ui); }
+  .langbtn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
   .title { font-family: var(--font); font-size: 26px; font-weight: 700; color: var(--ink); margin-top: 4px; }
   .sub { font-size: 12px; color: #7A8B6F; margin-top: 5px; }
   .body { padding: 0 14px 30px; }
@@ -133,6 +135,97 @@ const FIXTURES = [
 const DEFAULT_OVERS = 5;
 const STORAGE_KEY = "botoffices_bbb_v1";
 
+// ── Language (English / Sinhala) ────────────────────────────────────
+const LANG_KEY = "botoffices_lang";
+let LANG = localStorage.getItem(LANG_KEY) || "en";
+function setLang(l) { LANG = l; localStorage.setItem(LANG_KEY, l); render(); }
+
+const T = {
+  champ:        { en: "OFFICE CRICKET CHAMPIONSHIP", si: "කාර්යාල ක්‍රිකට් ශූරතාවය" },
+  appTitle:     { en: "Battle of the Offices", si: "කාර්යාලවල සටන" },
+  liveScoring:  { en: "Live ball-by-ball scoring", si: "සජීවී බෝලයෙන් බෝලයට ලකුණු" },
+  done:         { en: "done", si: "අවසන්" },
+  pointsTable:  { en: "Points Table", si: "ලකුණු වගුව" },
+  team:         { en: "Team", si: "කණ්ඩායම" },
+  top2:         { en: "Top 2", si: "ඉහළම 2" },
+  finalNote:    { en: "reach the Grand Final · Win 2 · Draw 1", si: "අවසන් තරගයට · ජය 2 · සම 1" },
+  matches:      { en: "Matches", si: "තරග" },
+  tapStart:     { en: "Tap to start scoring", si: "ලකුණු ඇතුළු කිරීමට තට්ටු කරන්න" },
+  live:         { en: "Live", si: "සජීවී" },
+  doneTag:      { en: "Done", si: "අවසන්" },
+  umpire:       { en: "Umpire", si: "විනිසුරු" },
+  mostRuns:     { en: "Most Runs", si: "වැඩිම ලකුණු" },
+  mostWickets:  { en: "Most Wickets", si: "වැඩිම කඩුලු" },
+  mostEcon:     { en: "Most Economical", si: "අඩුම ලකුණු දුන්" },
+  nothingYet:   { en: "Nothing yet", si: "තවම නැත" },
+  needOver:     { en: "Need at least 1 full over bowled", si: "අවම වශයෙන් 1 ඕවරයක් අවශ්‍යයි" },
+  econNote:     { en: "Most Economical = fewest runs per over (min 1 over bowled).", si: "අඩුම ලකුණු = ඕවරයකට අඩුම ලකුණු (අවම 1 ඕවර)." },
+  oversPer:     { en: "Overs per innings", si: "ඉනිමකට ඕවර" },
+  whoBatFirst:  { en: "Who bats first?", si: "පළමුව පිතිහරඹ කරන්නේ කවුද?" },
+  batsFirst:    { en: "bats first", si: "පළමුව පිතිහරඹ" },
+  batting:      { en: "batting", si: "පිතිහරඹ" },
+  chasing:      { en: "(chasing)", si: "(හඹායයි)" },
+  need:         { en: "Need", si: "අවශ්‍යයි" },
+  from:         { en: "from", si: "" },
+  balls:        { en: "balls", si: "බෝල" },
+  target:       { en: "Target", si: "ඉලක්කය" },
+  striker:      { en: "Striker", si: "පිතිකරු" },
+  nonStriker:   { en: "Non-striker", si: "අනෙක් පිතිකරු" },
+  bowler:       { en: "Bowler", si: "පන්දු යවන්නා" },
+  tapToSet:     { en: "Tap to set", si: "තෝරන්න" },
+  recent:       { en: "Recent:", si: "මෑත:" },
+  noBalls:      { en: "no balls yet", si: "තවම බෝල නැත" },
+  won:          { en: "won", si: "ජය ගත්තා" },
+  allOut:       { en: "All out!", si: "සියලු දෙනා දැවී!" },
+  oversComplete:{ en: "Overs complete", si: "ඕවර අවසන්" },
+  inningsIn:    { en: "in", si: "තුළ" },
+  overs:        { en: "overs", si: "ඕවර" },
+  finishMatch:  { en: "Finish match & see result", si: "තරගය අවසන් කර ප්‍රතිඵලය බලන්න" },
+  endStart2:    { en: "End innings → start 2nd innings", si: "ඉනිම අවසන් → 2වන ඉනිම" },
+  undoLast:     { en: "Undo last ball", si: "අවසන් බෝලය ඉවත් කරන්න" },
+  wicketPick:   { en: "Wicket! Pick the new batsman.", si: "කඩුල්ලයි! නව පිතිකරු තෝරන්න." },
+  overDone:     { en: "Over done — pick the next bowler.", si: "ඕවර අවසන් — ඊළඟ පන්දු යවන්නා තෝරන්න." },
+  setBegin:     { en: "Set the batsmen and bowler to begin.", si: "ආරම්භ කිරීමට පිතිකරුවන් සහ පන්දු යවන්නා තෝරන්න." },
+  chooseNewBat: { en: "Choose new batsman", si: "නව පිතිකරු තෝරන්න" },
+  chooseStriker:{ en: "Choose striker", si: "පිතිකරු තෝරන්න" },
+  chooseNon:    { en: "Choose non-striker", si: "අනෙක් පිතිකරු තෝරන්න" },
+  chooseBowler: { en: "Choose bowler", si: "පන්දු යවන්නා තෝරන්න" },
+  endEarly:     { en: "End innings early", si: "ඉනිම කලින් අවසන් කරන්න" },
+  wide:         { en: "Wide", si: "වයිඩ්" },
+  noball:       { en: "No-ball", si: "නෝ-බෝල්" },
+  undo:         { en: "↶ Undo", si: "↶ ආපසු" },
+  wicket:       { en: "WICKET", si: "කඩුල්ල" },
+  wideTitle:    { en: "Wide — how many did they run?", si: "වයිඩ් — කී ලකුණක් දිව්වාද?" },
+  wideNote:     { en: "+1 for the wide is added automatically and the ball is re-bowled. Add any runs the batters ran (these don't go to the batsman). Tap 0 for a normal wide.", si: "වයිඩ් එකට +1 ස්වයංක්‍රීයව එකතු වේ, බෝලය නැවත යවනු ලැබේ. දිවූ ලකුණු එකතු කරන්න (පිතිකරුට නොලැබේ). සාමාන්‍ය වයිඩ් සඳහා 0 තට්ටු කරන්න." },
+  noballTitle:  { en: "No-ball — runs off the bat?", si: "නෝ-බෝල් — පිතිකරුගේ ලකුණු?" },
+  noballNote:   { en: "+1 for the no-ball is added automatically and the ball is re-bowled. Pick any runs the batsman scored.", si: "නෝ-බෝල් එකට +1 ස්වයංක්‍රීයව එකතු වේ, බෝලය නැවත යවනු ලැබේ. පිතිකරු ලබාගත් ලකුණු තෝරන්න." },
+  wicketTitle:  { en: "Wicket — what happened?", si: "කඩුල්ල — මොකද වුණේ?" },
+  wicketNote:   { en: "The striker is out (bowled/caught/lbw). If the batters crossed before a catch was taken, the non-striker keeps strike.", si: "පිතිකරු දැවී ඇත. පන්දුව අල්ලන්නට පෙර පිතිකරුවන් මාරු වුණා නම්, අනෙක් පිතිකරු පිතිහරඹ කරයි." },
+  outNoCross:   { en: "Out — batters did NOT cross", si: "දැවුණා — පිතිකරුවන් මාරු වුණේ නැහැ" },
+  outNoCrossSub:{ en: "New batsman faces next (normal)", si: "නව පිතිකරු ඊළඟට (සාමාන්‍ය)" },
+  outCross:     { en: "Out — batters CROSSED", si: "දැවුණා — පිතිකරුවන් මාරු වුණා" },
+  outCrossSub:  { en: "Non-striker is on strike now", si: "අනෙක් පිතිකරු දැන් පිතිහරඹ කරයි" },
+  runOut:       { en: "Run out (while running)", si: " දිවීමේදී දැවීම (රන් අවුට්)" },
+  runOutSub:    { en: "Add runs completed + who got out", si: "සම්පූර්ණ ලකුණු + දැවුණේ කවුද" },
+  runOutTitle:  { en: "Run out — runs completed?", si: "රන් අවුට් — සම්පූර්ණ ලකුණු?" },
+  runOutNote:   { en: "Pick how many runs the batters completed before the run out (these DO count to the striker's score), then choose who was run out.", si: "රන් අවුට් වීමට පෙර සම්පූර්ණ කළ ලකුණු තෝරන්න (පිතිකරුට ලැබේ), පසුව දැවුණේ කවුද තෝරන්න." },
+  whoRunOut:    { en: "Who was run out?", si: "දැවුණේ කවුද?" },
+  runCompleted: { en: "completed", si: "සම්පූර්ණයි" },
+  tapWhoOut:    { en: "Tap the batsman who was run out.", si: "දැවුණු පිතිකරු තට්ටු කරන්න." },
+  result:       { en: "Result", si: "ප්‍රතිඵලය" },
+  matchTied:    { en: "Match tied", si: "තරගය සමයි" },
+  byRuns:       { en: "runs", si: "ලකුණින්" },
+  byWickets:    { en: "wickets", si: "කඩුලුවලින්" },
+  by:           { en: "by", si: "" },
+  notOut:       { en: "not out", si: "දැවී නැත" },
+  bowling:      { en: "Bowling", si: "පන්දු යැවීම" },
+  shareResult:  { en: "📤 Share result (WhatsApp)", si: "📤 ප්‍රතිඵලය බෙදන්න (WhatsApp)" },
+  reopen:       { en: "Reopen / fix scoring", si: "නැවත විවෘත කරන්න / නිවැරදි කරන්න" },
+  back:         { en: "‹ Back", si: "‹ ආපසු" },
+  players7:     { en: "players", si: "ක්‍රීඩකයින්" },
+};
+function t(k) { return (T[k] && T[k][LANG]) || (T[k] && T[k].en) || k; }
+
 // ── State + storage ─────────────────────────────────────────────────
 let DATA = {};
 let VIEW = { name: "home" };
@@ -216,20 +309,20 @@ function renderHome() {
 
   let matches = FIXTURES.map(fx => {
     const m = DATA[fx.id]; const live = m && !m.complete && m.innings1; const h = TEAMS[fx.home];
-    let line = "Tap to start scoring";
+    let line = t("tapStart");
     if (m?.complete) { const s1=tally(m.innings1), s2=tally(m.innings2);
       line = `${m.innings1.battingTeam} ${s1.runs}/${s1.wkts} — ${m.innings2.battingTeam} ${s2.runs}/${s2.wkts}`; }
     else if (m?.innings1) { const inn = m.innings2||m.innings1, s=tally(inn);
-      line = `Live · ${inn.battingTeam} ${s.runs}/${s.wkts} (${s.oversText})`; }
+      line = `${t("live")} · ${inn.battingTeam} ${s.runs}/${s.wkts} (${s.oversText})`; }
     return `<button class="matchcard" data-open="${fx.id}">
       <div class="accent" style="background:${h.color}"></div>
       <div style="flex:1;min-width:0">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <b style="font-size:15px;color:var(--ink)">${fx.home} v ${fx.away}</b>
-          ${m?.complete?'<span class="pill done">Done</span>':live?'<span class="pill live">● Live</span>':''}
+          ${m?.complete?`<span class="pill done">${t("doneTag")}</span>`:live?`<span class="pill live">● ${t("live")}</span>`:''}
         </div>
         <div style="font-size:12px;color:#8a8472;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(line)}</div>
-        <div style="font-size:11px;color:#b8a878;margin-top:2px">${fx.round} · Umpire ${fx.umpire}</div>
+        <div style="font-size:11px;color:#b8a878;margin-top:2px">${fx.round} · ${t("umpire")} ${fx.umpire}</div>
       </div><span class="chev">›</span></button>`;
   }).join("");
 
@@ -240,43 +333,51 @@ function renderHome() {
     <span class="c" style="width:36px;font-weight:800;color:var(--ink)">${s.pts}</span></div>`).join("");
 
   const statsBlock = (ld.topBat.length||ld.topBowl.length||ld.economical.length) ? `
-    <div class="label">Most Runs</div><div class="card">${
+    <div class="label">${t("mostRuns")}</div><div class="card">${
       ld.topBat.map((b,i)=>`<div class="row ${i===0?'gold0':''}"><span style="width:16px;font-weight:700;color:${i===0?'var(--gold)':'#ccc'}">${i+1}</span>
         <span style="flex:1;display:flex;gap:6px;align-items:center">${dot(TEAMS[b.team].color)}<span style="font-size:14px;color:var(--ink)">${b.name}</span></span>
-        <b style="color:var(--ink)">${b.runs}</b></div>`).join("")||'<div class="row" style="color:#c0b8a0;justify-content:center">Nothing yet</div>'
+        <b style="color:var(--ink)">${b.runs}</b></div>`).join("")||`<div class="row" style="color:#c0b8a0;justify-content:center">${t("nothingYet")}</div>`
     }</div>
-    <div class="label">Most Wickets</div><div class="card">${
+    <div class="label">${t("mostWickets")}</div><div class="card">${
       ld.topBowl.map((b,i)=>`<div class="row ${i===0?'gold0':''}"><span style="width:16px;font-weight:700;color:${i===0?'var(--gold)':'#ccc'}">${i+1}</span>
         <span style="flex:1;display:flex;gap:6px;align-items:center">${dot(TEAMS[b.team].color)}<span style="font-size:14px;color:var(--ink)">${b.name}</span></span>
         <span style="color:#aaa;font-size:12px;width:70px;text-align:right">${Math.floor(b.balls/6)}.${b.balls%6} ov</span>
-        <b style="color:var(--ink);width:36px;text-align:right">${b.wkts}w</b></div>`).join("")||'<div class="row" style="color:#c0b8a0;justify-content:center">Nothing yet</div>'
+        <b style="color:var(--ink);width:36px;text-align:right">${b.wkts}w</b></div>`).join("")||`<div class="row" style="color:#c0b8a0;justify-content:center">${t("nothingYet")}</div>`
     }</div>
-    <div class="label">Most Economical</div><div class="card">${
+    <div class="label">${t("mostEcon")}</div><div class="card">${
       ld.economical.length? ld.economical.map((b,i)=>`<div class="row ${i===0?'gold0':''}"><span style="width:16px;font-weight:700;color:${i===0?'var(--gold)':'#ccc'}">${i+1}</span>
         <span style="flex:1;display:flex;gap:6px;align-items:center">${dot(TEAMS[b.team].color)}<span style="font-size:14px;color:var(--ink)">${b.name}</span></span>
         <span style="color:#aaa;font-size:12px;width:78px;text-align:right">${Math.floor(b.balls/6)}.${b.balls%6} ov · ${b.runs}r</span>
         <b style="color:var(--green);width:44px;text-align:right">${(b.runs/b.balls*6).toFixed(1)}</b></div>`).join("")
-        : '<div class="row" style="color:#c0b8a0;justify-content:center">Need at least 1 full over bowled</div>'
+        : `<div class="row" style="color:#c0b8a0;justify-content:center">${t("needOver")}</div>`
     }</div>
-    <div class="fine">Most Economical = fewest runs per over (min 1 over bowled).</div>` : "";
+    <div class="fine">${t("econNote")}</div>` : "";
 
   return `<div class="header">
-      <div class="eyebrow">OFFICE CRICKET CHAMPIONSHIP</div>
-      <div class="title">Battle of the Offices</div>
-      <div class="sub">Live ball-by-ball scoring · ${played}/${FIXTURES.length} done</div>
+      ${langToggle()}
+      <div class="eyebrow">${t("champ")}</div>
+      <div class="title">${t("appTitle")}</div>
+      <div class="sub">${t("liveScoring")} · ${played}/${FIXTURES.length} ${t("done")}</div>
     </div>
     <div class="body">
-      <div class="label">Points Table</div>
+      <div class="label">${t("pointsTable")}</div>
       <div class="card">
-        <div class="row head"><span style="width:18px">#</span><span style="flex:1">Team</span>
+        <div class="row head"><span style="width:18px">#</span><span style="flex:1">${t("team")}</span>
           <span class="c">P</span><span class="c">W</span><span class="c">L</span><span class="c" style="width:36px;font-weight:800">Pts</span></div>
         ${tableRows}
       </div>
-      <div class="notice"><b style="color:var(--gold)">🏆 Top 2</b> reach the Grand Final · Win 2 · Draw 1</div>
-      <div class="label">Matches</div>
+      <div class="notice"><b style="color:var(--gold)">🏆 ${t("top2")}</b> ${t("finalNote")}</div>
+      <div class="label">${t("matches")}</div>
       ${matches}
       ${statsBlock}
     </div>`;
+}
+
+function langToggle() {
+  return `<div style="display:flex;justify-content:center;gap:0;margin-bottom:12px">
+    <button class="langbtn ${LANG==='en'?'on':''}" data-lang="en" style="border-radius:20px 0 0 20px">English</button>
+    <button class="langbtn ${LANG==='si'?'on':''}" data-lang="si" style="border-radius:0 20px 20px 0">සිංහල</button>
+  </div>`;
 }
 
 // ── MATCH ───────────────────────────────────────────────────────────
@@ -295,15 +396,15 @@ function renderToss(fx) {
   const overs = UI_STATE.overs;
   const oBtns = [3,4,5,6,8].map(o=>`<button class="oversbtn ${overs===o?'on':''}" data-overs="${o}">${o}</button>`).join("");
   const teams = [fx.home, fx.away].map(team=>`<button class="bigchoice" data-batfirst="${team}">
-      ${dot(TEAMS[team].color,true)}<span style="font-size:17px;font-weight:700;color:${TEAMS[team].text}">${team} bats first</span>
+      ${dot(TEAMS[team].color,true)}<span style="font-size:17px;font-weight:700;color:${TEAMS[team].text}">${team} ${t("batsFirst")}</span>
       <span class="chev" style="margin-left:auto">›</span></button>`).join("");
   return `${topbar(fx.home+" v "+fx.away)}
     <div class="body" style="padding-top:20px">
-      <div class="label">Overs per innings</div>
+      <div class="label">${t("oversPer")}</div>
       <div style="display:flex;gap:8px">${oBtns}</div>
-      <div class="label">Who bats first?</div>
+      <div class="label">${t("whoBatFirst")}</div>
       ${teams}
-      <div class="fine">Umpire: ${fx.umpire} · ${fx.round}</div>
+      <div class="fine">${t("umpire")}: ${fx.umpire} · ${fx.round}</div>
     </div>`;
 }
 
@@ -312,71 +413,76 @@ function renderLive(fx, m) {
   const inn = m[key];
   const target = m.innings2 ? tally(m.innings1).runs + 1 : null;
   const isSecond = !!m.innings2;
-  const t = tally(inn);
+  const sc = tally(inn);
   const battingRoster = ROSTERS[inn.battingTeam];
   const teamC = TEAMS[inn.battingTeam];
 
   const needStriker = !inn.striker, needNon = !inn.nonStriker, needBowler = !inn.bowler;
-  const allOut = t.wkts >= battingRoster.length - 1;
-  const oversUp = t.legal >= inn.overs * 6;
+  const allOut = sc.wkts >= battingRoster.length - 1;
+  const oversUp = sc.legal >= inn.overs * 6;
   const inningsOver = allOut || oversUp;
-  const chased = isSecond && target && t.runs >= target;
+  const chased = isSecond && target && sc.runs >= target;
 
   const sb = `<div class="scoreboard" style="background:${teamC.soft}">
-      <div class="sb-team" style="color:${teamC.text}">${inn.battingTeam} ${isSecond?"(chasing)":"batting"}</div>
+      <div class="sb-team" style="color:${teamC.text}">${inn.battingTeam} ${isSecond?t("chasing"):t("batting")}</div>
       <div style="display:flex;align-items:baseline;gap:10px;margin-top:2px">
-        <span class="sb-score" style="color:${teamC.text}">${t.runs}/${t.wkts}</span>
-        <span class="sb-ov">(${t.oversText}/${inn.overs} ov)</span></div>
-      ${isSecond&&target?`<div class="sb-target">Need ${Math.max(0,target-t.runs)} from ${Math.max(0,inn.overs*6-t.legal)} balls · Target ${target}</div>`:""}
+        <span class="sb-score" style="color:${teamC.text}">${sc.runs}/${sc.wkts}</span>
+        <span class="sb-ov">(${sc.oversText}/${inn.overs} ${t("overs")})</span></div>
+      ${isSecond&&target?`<div class="sb-target">${t("need")} ${Math.max(0,target-sc.runs)} ${t("from")} ${Math.max(0,inn.overs*6-sc.legal)} ${t("balls")} · ${t("target")} ${target}</div>`:""}
     </div>`;
 
   const chip = (lbl, name, sub, star) => `<button class="chip" data-pick="${star===2?'bowler':star===1?'striker':'nonStriker'}">
       <div class="lbl">${star===1?"🏏 ":""}${lbl}</div>
-      <div class="nm" style="color:${name?'var(--ink)':'#c8bfa8'}">${name?esc(name):"Tap to set"}</div>
+      <div class="nm" style="color:${name?'var(--ink)':'#c8bfa8'}">${name?esc(name):t("tapToSet")}</div>
       ${sub?`<div class="fig">${sub}</div>`:""}</button>`;
-  const stF = inn.striker ? `${t.bat[inn.striker]?.runs??0} (${t.bat[inn.striker]?.balls??0})` : "";
-  const nsF = inn.nonStriker ? `${t.bat[inn.nonStriker]?.runs??0} (${t.bat[inn.nonStriker]?.balls??0})` : "";
-  const bwF = inn.bowler ? (()=>{const f=t.bowl[inn.bowler]||{wkts:0,runs:0,balls:0};return `${f.wkts}-${f.runs} (${Math.floor(f.balls/6)}.${f.balls%6})`;})() : "";
+  const stF = inn.striker ? `${sc.bat[inn.striker]?.runs??0} (${sc.bat[inn.striker]?.balls??0})` : "";
+  const nsF = inn.nonStriker ? `${sc.bat[inn.nonStriker]?.runs??0} (${sc.bat[inn.nonStriker]?.balls??0})` : "";
+  const bwF = inn.bowler ? (()=>{const f=sc.bowl[inn.bowler]||{wkts:0,runs:0,balls:0};return `${f.wkts}-${f.runs} (${Math.floor(f.balls/6)}.${f.balls%6})`;})() : "";
   const playersBar = `<div class="playersbar">
-      ${chip("Striker", inn.striker, stF, 1)}
-      ${chip("Non-striker", inn.nonStriker, nsF, 0)}
-      ${chip("Bowler", inn.bowler, bwF, 2)}</div>`;
+      ${chip(t("striker"), inn.striker, stF, 1)}
+      ${chip(t("nonStriker"), inn.nonStriker, nsF, 0)}
+      ${chip(t("bowler"), inn.bowler, bwF, 2)}</div>`;
 
   const dots = inn.balls.slice(-8).map(b=>{
     const bg = b.wicket?"#C0351A":b.extra?"#E8A33D":b.runs===0?"#ece4d0":"#3A8C4E";
     const col = (b.wicket||b.runs>0||b.extra)?"#fff":"#999";
     const txt = b.wicket?"W":b.extra?(b.runs?`${b.runs}+e`:"e"):b.runs;
     return `<span class="balldot" style="background:${bg};color:${col}">${txt}</span>`;
-  }).join("") || '<span style="font-size:12px;color:#ccc">no balls yet</span>';
-  const overstrip = `<div class="overstrip"><span style="font-size:11px;color:#b0a890;margin-right:6px">Recent:</span>${dots}</div>`;
+  }).join("") || `<span style="font-size:12px;color:#ccc">${t("noBalls")}</span>`;
+  const overstrip = `<div class="overstrip"><span style="font-size:11px;color:#b0a890;margin-right:6px">${t("recent")}</span>${dots}</div>`;
 
   let main;
   if (inningsOver || chased) {
     main = `<div class="body">
-      <div class="endbox"><div style="font-size:16px;font-weight:700;color:var(--ink)">${chased?inn.battingTeam+" won! 🎉":allOut?"All out!":"Overs complete"}</div>
-        <div style="font-size:13px;color:#8a8472;margin-top:4px">${inn.battingTeam} ${t.runs}/${t.wkts} in ${t.oversText} overs</div></div>
-      <button class="primarybtn" data-endinnings="1">${isSecond?"Finish match & see result":"End innings → start 2nd innings"}</button>
-      <button class="ghostbtn" data-undo="1">Undo last ball</button></div>`;
+      <div class="endbox"><div style="font-size:16px;font-weight:700;color:var(--ink)">${chased?inn.battingTeam+" "+t("won")+" 🎉":allOut?t("allOut"):t("oversComplete")}</div>
+        <div style="font-size:13px;color:#8a8472;margin-top:4px">${inn.battingTeam} ${sc.runs}/${sc.wkts} ${t("inningsIn")} ${sc.oversText} ${t("overs")}</div></div>
+      <button class="primarybtn" data-endinnings="1">${isSecond?t("finishMatch"):t("endStart2")}</button>
+      <button class="ghostbtn" data-undo="1">${t("undoLast")}</button></div>`;
   } else if (UI_STATE.wicketPick || needStriker || needNon || needBowler) {
-    const hint = UI_STATE.wicketPick ? "Wicket! Pick the new batsman."
-      : (needBowler && !needStriker && !needNon) ? "Over done — pick the next bowler."
-      : "Set the batsmen and bowler to begin.";
+    const hint = UI_STATE.wicketPick ? t("wicketPick")
+      : (needBowler && !needStriker && !needNon) ? t("overDone")
+      : t("setBegin");
     let btns = "";
-    if (needStriker || UI_STATE.wicketPick) btns += `<button class="setupbtn" data-pick="striker">Choose new batsman<span class="chev">›</span></button>`;
-    if (needNon && !UI_STATE.wicketPick) btns += `<button class="setupbtn" data-pick="nonStriker">Choose non-striker<span class="chev">›</span></button>`;
-    if (needBowler && !UI_STATE.wicketPick) btns += `<button class="setupbtn" data-pick="bowler">Choose bowler<span class="chev">›</span></button>`;
-    if (inn.balls.length>0) btns += `<button class="ghostbtn" data-undo="1">Undo last ball</button>`;
+    if (UI_STATE.wicketPick) {
+      const emptyEnd = !inn.striker ? "striker" : "nonStriker";
+      btns += `<button class="setupbtn" data-pick="${emptyEnd}">${t("chooseNewBat")}<span class="chev">›</span></button>`;
+    } else {
+      if (needStriker) btns += `<button class="setupbtn" data-pick="striker">${t("chooseStriker")}<span class="chev">›</span></button>`;
+      if (needNon) btns += `<button class="setupbtn" data-pick="nonStriker">${t("chooseNon")}<span class="chev">›</span></button>`;
+      if (needBowler) btns += `<button class="setupbtn" data-pick="bowler">${t("chooseBowler")}<span class="chev">›</span></button>`;
+    }
+    if (inn.balls.length>0) btns += `<button class="ghostbtn" data-undo="1">${t("undoLast")}</button>`;
     main = `<div class="body"><div class="hint">${hint}</div>${btns}</div>`;
   } else {
     main = `<div class="pad">
       <div class="runrow">${[0,1,2,3].map(r=>`<button class="runbtn" data-run="${r}">${r}</button>`).join("")}</div>
       <div class="runrow">${[4,6].map(r=>`<button class="runbtn green" data-run="${r}">${r}</button>`).join("")}
-        <button class="runbtn red" style="flex:2" data-wicket="1">WICKET</button></div>
+        <button class="runbtn red" style="flex:2" data-pick="wicket">${t("wicket")}</button></div>
       <div class="extrarow">
-        <button class="extrabtn" data-pick="wide">Wide</button>
-        <button class="extrabtn" data-pick="noball">No-ball</button>
-        <button class="undobtn" data-undo="1">↶ Undo</button></div>
-      <button class="endearly" data-endinnings="1">End innings early</button></div>`;
+        <button class="extrabtn" data-pick="wide">${t("wide")}</button>
+        <button class="extrabtn" data-pick="noball">${t("noball")}</button>
+        <button class="undobtn" data-undo="1">${t("undo")}</button></div>
+      <button class="endearly" data-endinnings="1">${t("endEarly")}</button></div>`;
   }
 
   return topbar(fx.home+" v "+fx.away) + sb + playersBar + overstrip + main + renderPicker(fx, m, inn);
@@ -385,28 +491,47 @@ function renderLive(fx, m) {
 function renderPicker(fx, m, inn) {
   const p = UI_STATE.picker; if (!p) return "";
   if (p === "wide") {
-    return modal("Wide — how many did they run?", `
-      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">+1 for the wide is added automatically and the ball is re-bowled. Add any runs the batters ran (these don't go to the batsman). Tap 0 for a normal wide.</div>
+    return modal(t("wideTitle"), `
+      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">${t("wideNote")}</div>
       <div class="runrow">${[0,1,2,3,4].map(r=>`<button class="runbtn" data-wide="${r}">${r}</button>`).join("")}</div>`);
   }
   if (p === "noball") {
-    return modal("No-ball — runs off the bat?", `
-      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">+1 for the no-ball is added automatically and the ball is re-bowled. Pick any runs the batsman scored.</div>
+    return modal(t("noballTitle"), `
+      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">${t("noballNote")}</div>
       <div class="runrow">${[0,1,2,3,4,6].map(r=>`<button class="runbtn" data-noball="${r}">${r}</button>`).join("")}</div>`);
+  }
+  if (p === "wicket") {
+    return modal(t("wicketTitle"), `
+      <div style="font-size:13px;color:#8a8472;margin-bottom:12px">${t("wicketNote")}</div>
+      <button class="setupbtn" data-wicket="0" style="margin-bottom:10px">${t("outNoCross")}<br><span style="font-size:11px;color:#8a8472;font-weight:400">${t("outNoCrossSub")}</span></button>
+      <button class="setupbtn" data-wicket="1" style="margin-bottom:10px">${t("outCross")}<br><span style="font-size:11px;color:#8a8472;font-weight:400">${t("outCrossSub")}</span></button>
+      <button class="setupbtn" data-pick="runout">${t("runOut")}<br><span style="font-size:11px;color:#8a8472;font-weight:400">${t("runOutSub")}</span></button>`);
+  }
+  if (p === "runout") {
+    return modal(t("runOutTitle"), `
+      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">${t("runOutNote")}</div>
+      <div class="runrow">${[0,1,2,3].map(r=>`<button class="runbtn" data-runout="${r}">${r}</button>`).join("")}</div>`);
+  }
+  if (typeof p === "object" && p.role === "runoutwho") {
+    const inn2 = inn;
+    return modal(t("whoRunOut"), `
+      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">${p.runs} ${t("byRuns")} ${t("runCompleted")}. ${t("tapWhoOut")}</div>
+      <button class="pickrow" data-roout="striker">${dot(TEAMS[inn2.battingTeam].color)}<span style="font-size:15px">${esc(inn2.striker||t("striker"))}</span><span style="font-size:11px;color:#aaa;margin-left:auto">${t("striker")}</span></button>
+      <button class="pickrow" data-roout="nonStriker">${dot(TEAMS[inn2.battingTeam].color)}<span style="font-size:15px">${esc(inn2.nonStriker||t("nonStriker"))}</span><span style="font-size:11px;color:#aaa;margin-left:auto">${t("nonStriker")}</span></button>`);
   }
   // player picker
   const isBowler = p === "bowler";
   const roster = isBowler ? ROSTERS[inn.bowlingTeam] : ROSTERS[inn.battingTeam];
-  const t = tally(inn);
+  const sc = tally(inn);
   const used = [inn.striker, inn.nonStriker].filter(Boolean);
-  const outNames = Object.entries(t.bat).filter(([,v])=>v.out).map(([n])=>n);
-  const title = p==="striker"?"Choose batsman":p==="nonStriker"?"Choose non-striker":"Choose bowler";
+  const outNames = Object.entries(sc.bat).filter(([,v])=>v.out).map(([n])=>n);
+  const title = p==="striker"?t("chooseStriker"):p==="nonStriker"?t("chooseNon"):t("chooseBowler");
   const rows = roster.map(pl=>{
     const dis = !isBowler && (used.includes(pl) || outNames.includes(pl));
     const teamColor = TEAMS[isBowler?inn.bowlingTeam:inn.battingTeam].color;
     let tag = "";
-    if (outNames.includes(pl)) tag = `<span style="font-size:11px;color:var(--red);margin-left:auto">out</span>`;
-    else if (used.includes(pl)) tag = `<span style="font-size:11px;color:#aaa;margin-left:auto">at crease</span>`;
+    if (outNames.includes(pl)) tag = `<span style="font-size:11px;color:var(--red);margin-left:auto">${LANG==='si'?'දැවුණා':'out'}</span>`;
+    else if (used.includes(pl)) tag = `<span style="font-size:11px;color:#aaa;margin-left:auto">${LANG==='si'?'ක්‍රීඩා කරයි':'at crease'}</span>`;
     return `<button class="pickrow" data-assign="${p}" data-name="${esc(pl)}" ${dis?'disabled style="opacity:.35"':''}>
       ${dot(teamColor)}<span style="font-size:15px">${esc(pl)}</span>${tag}</button>`;
   }).join("");
@@ -418,11 +543,11 @@ function renderResult(fx, m) {
   const r1 = s1.runs, r2 = s2.runs;
   const winner = r1>r2 ? m.innings1.battingTeam : r2>r1 ? m.innings2.battingTeam : null;
   const margin = winner ? (winner===m.innings2.battingTeam
-    ? `by ${ROSTERS[winner].length-1-s2.wkts} wickets` : `by ${r1-r2} runs`) : "Match tied";
+    ? `${t("by")} ${ROSTERS[winner].length-1-s2.wkts} ${t("byWickets")}` : `${t("by")} ${r1-r2} ${t("byRuns")}`) : t("matchTied");
 
   const innBlock = (inn)=>{ const tl=tally(inn), tt=TEAMS[inn.battingTeam];
     const batRows = Object.entries(tl.bat).filter(([,v])=>v.balls>0||v.runs>0||v.out).map(([n,v])=>`<div class="row">
-        <span style="flex:1;font-size:13px">${esc(n)}${!v.out?'<span style="color:var(--green);font-size:11px"> not out</span>':''}</span>
+        <span style="flex:1;font-size:13px">${esc(n)}${!v.out?`<span style="color:var(--green);font-size:11px"> ${t("notOut")}</span>`:''}</span>
         <span style="color:#888;font-size:12px;width:50px;text-align:right">${v.balls}b</span>
         <b style="width:40px;text-align:right;color:var(--ink)">${v.runs}</b></div>`).join("");
     const bowlRows = Object.entries(tl.bowl).map(([n,v])=>`<div class="row">
@@ -434,22 +559,22 @@ function renderResult(fx, m) {
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">${dot(tt.color)}<b style="color:${tt.text};font-size:15px">${inn.battingTeam}</b>
         <b style="margin-left:auto;color:var(--ink)">${tl.runs}/${tl.wkts}</b><span style="color:#aaa;font-size:13px">(${tl.oversText})</span></div>
       <div class="card">${batRows}</div>
-      <div style="font-size:11px;color:#b0a890;margin:6px 2px 0">Bowling</div>
+      <div style="font-size:11px;color:#b0a890;margin:6px 2px 0">${t("bowling")}</div>
       <div class="card">${bowlRows}</div></div>`; };
 
-  return `${topbar("Result")}
+  return `${topbar(t("result"))}
     <div class="body" style="padding-top:18px">
       <div class="resulthero"><div style="font-size:12px;color:#b0a890;letter-spacing:1px">${fx.round.toUpperCase()}</div>
-        <div style="font-size:22px;font-weight:800;color:var(--gold);font-family:var(--font);margin:6px 0">${winner?winner+" won":"Match tied"}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--gold);font-family:var(--font);margin:6px 0">${winner?winner+" "+t("won"):t("matchTied")}</div>
         ${winner?`<div style="font-size:13px;color:#8a8472">${margin}</div>`:""}</div>
       ${innBlock(m.innings1)}${innBlock(m.innings2)}
-      <button class="sharebtn" data-share="1">📤 Share result (WhatsApp)</button>
-      <button class="ghostbtn" data-reopen="1" style="margin-top:10px">Reopen / fix scoring</button>
+      <button class="sharebtn" data-share="1">${t("shareResult")}</button>
+      <button class="ghostbtn" data-reopen="1" style="margin-top:10px">${t("reopen")}</button>
     </div>`;
 }
 
 function topbar(title) {
-  return `<div class="topbar"><button class="backbtn" data-back="1">‹ Back</button><span class="t">${esc(title)}</span><span style="width:64px"></span></div>`;
+  return `<div class="topbar"><button class="backbtn" data-back="1">${t("back")}</button><span class="t">${esc(title)}</span><span style="width:64px"></span></div>`;
 }
 function modal(title, inner) {
   return `<div class="overlay" data-closemodal="1"><div class="modal" data-stop="1">
@@ -488,12 +613,37 @@ function recordBall(ball) {
   if (ball.legal && nl % 6 === 0) { const s=inn.striker; inn.striker=inn.nonStriker; inn.nonStriker=s; inn.bowler=null; }
   m[key] = inn; setMatch(m);
 }
-function recordWicket() {
+function recordWicket(crossed) {
   const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
   inn.balls = [...inn.balls, { legal:true, runs:0, extra:0, wicket:true, striker:inn.striker, bowler:inn.bowler, outName:inn.striker }];
-  inn.striker = null;
-  const nl = tally(inn).legal; if (nl % 6 === 0) inn.bowler = null;
-  m[key] = inn; UI_STATE.wicketPick = true; setMatch(m);
+  // striker is out. If batters crossed, the non-striker takes strike and the
+  // new batsman comes in at the non-striker's (now vacant) end.
+  if (crossed) { inn.striker = inn.nonStriker; inn.nonStriker = null; }
+  else { inn.striker = null; }
+  // end of over swaps ends too
+  const nl = tally(inn).legal;
+  if (nl % 6 === 0) {
+    inn.bowler = null;
+    const s = inn.striker; inn.striker = inn.nonStriker; inn.nonStriker = s;
+  }
+  m[key] = inn; UI_STATE.wicketPick = true; UI_STATE.picker = null; setMatch(m);
+}
+function recordRunOut(runs, whoOut) {
+  const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
+  // The completed runs count to the striker. Record them on this ball, and mark who's out.
+  inn.balls = [...inn.balls, { legal:true, runs:runs, extra:0, wicket:true,
+    striker:inn.striker, bowler:inn.bowler, outName:(whoOut==="striker"?inn.striker:inn.nonStriker) }];
+  // Work out positions after the runs. Odd runs means they swapped ends.
+  let s = inn.striker, ns = inn.nonStriker;
+  if (runs % 2 === 1) { const tmp = s; s = ns; ns = tmp; }
+  // Remove whoever is out from their end (after the swap, identify by name).
+  const outName = (whoOut === "striker" ? inn.striker : inn.nonStriker);
+  if (s === outName) s = null; else if (ns === outName) ns = null;
+  inn.striker = s; inn.nonStriker = ns;
+  // end of over swap
+  const nl = tally(inn).legal;
+  if (nl % 6 === 0) { inn.bowler = null; const tmp = inn.striker; inn.striker = inn.nonStriker; inn.nonStriker = tmp; }
+  m[key] = inn; UI_STATE.wicketPick = true; UI_STATE.picker = null; setMatch(m);
 }
 function undo() {
   const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
@@ -510,9 +660,11 @@ function endInnings() {
 function attach() {
   const app = document.getElementById("app");
   app.onclick = (e) => {
-    const el = e.target.closest("[data-back],[data-open],[data-overs],[data-batfirst],[data-pick],[data-run],[data-wicket],[data-undo],[data-endinnings],[data-assign],[data-wide],[data-noball],[data-closemodal],[data-stop],[data-share],[data-reopen]");
+    const el = e.target.closest("[data-back],[data-open],[data-overs],[data-batfirst],[data-pick],[data-run],[data-wicket],[data-runout],[data-roout],[data-undo],[data-endinnings],[data-assign],[data-wide],[data-noball],[data-closemodal],[data-stop],[data-share],[data-reopen],[data-lang]");
     if (!el) return;
     const d = el.dataset;
+
+    if (d.lang !== undefined) { setLang(d.lang); return; }
 
     if (d.stop !== undefined && el === e.target) {} // clicks inside modal content
     if (d.back !== undefined) { VIEW = { name: "home" }; UI_STATE.picker=null; UI_STATE.wicketPick=false; return render(); }
@@ -527,7 +679,9 @@ function attach() {
     if (d.pick !== undefined) { VIEW.scrollTop = window.scrollY; UI_STATE.picker = d.pick; return render(); }
     if (d.closemodal !== undefined) { UI_STATE.picker = null; return render(); }
     if (d.run !== undefined) { VIEW.scrollTop = window.scrollY; recordBall({ legal:true, runs:+d.run }); return; }
-    if (d.wicket !== undefined) { VIEW.scrollTop = window.scrollY; recordWicket(); return; }
+    if (d.wicket !== undefined) { VIEW.scrollTop = window.scrollY; recordWicket(d.wicket === "1"); return; }
+    if (d.runout !== undefined) { VIEW.scrollTop = window.scrollY; UI_STATE.picker = { role: "runoutwho", runs: +d.runout }; return render(); }
+    if (d.roout !== undefined) { VIEW.scrollTop = window.scrollY; recordRunOut(UI_STATE.picker.runs, d.roout); return; }
     if (d.undo !== undefined) { VIEW.scrollTop = window.scrollY; undo(); return; }
     if (d.endinnings !== undefined) { endInnings(); return; }
     if (d.wide !== undefined) { UI_STATE.picker=null; VIEW.scrollTop=window.scrollY; recordBall({ legal:false, extra:1+(+d.wide) }); return; }
