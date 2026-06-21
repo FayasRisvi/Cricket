@@ -223,6 +223,17 @@ const T = {
   reopen:       { en: "Reopen / fix scoring", si: "නැවත විවෘත කරන්න / නිවැරදි කරන්න" },
   back:         { en: "‹ Back", si: "‹ ආපසු" },
   players7:     { en: "players", si: "ක්‍රීඩකයින්" },
+  resetBtn:     { en: "⚙ Fix / Reset", si: "⚙ නිවැරදි / යළි" },
+  resetTitle:   { en: "Fix or reset", si: "නිවැරදි කරන්න හෝ යළි සකසන්න" },
+  changeStriker:{ en: "Change striker", si: "පිතිකරු වෙනස් කරන්න" },
+  changeNon:    { en: "Change non-striker", si: "අනෙක් පිතිකරු වෙනස් කරන්න" },
+  changeBowler: { en: "Change bowler", si: "පන්දු යවන්නා වෙනස් කරන්න" },
+  resetOver:    { en: "Reset this over", si: "මෙම ඕවර යළි සකසන්න" },
+  resetOverSub: { en: "Remove all balls bowled in the current over", si: "මෙම ඕවරයේ සියලු බෝල ඉවත් කරන්න" },
+  resetMatch:   { en: "Reset whole match", si: "මුළු තරගයම යළි සකසන්න" },
+  resetMatchSub:{ en: "Erase everything and start this match over", si: "සියල්ල මකා තරගය නැවත අරඹන්න" },
+  confirmReset: { en: "Reset whole match? This erases all scores for this match and cannot be undone.", si: "මුළු තරගයම යළි සකසන්නද? මෙම තරගයේ සියලු ලකුණු මැකෙනු ඇත." },
+  cancel:       { en: "Cancel", si: "අවලංගු කරන්න" },
 };
 function t(k) { return (T[k] && T[k][LANG]) || (T[k] && T[k].en) || k; }
 
@@ -482,7 +493,8 @@ function renderLive(fx, m) {
         <button class="extrabtn" data-pick="wide">${t("wide")}</button>
         <button class="extrabtn" data-pick="noball">${t("noball")}</button>
         <button class="undobtn" data-undo="1">${t("undo")}</button></div>
-      <button class="endearly" data-endinnings="1">${t("endEarly")}</button></div>`;
+      <button class="endearly" data-pick="reset">${t("resetBtn")}</button>
+      <button class="endearly" data-endinnings="1" style="margin-top:2px">${t("endEarly")}</button></div>`;
   }
 
   return topbar(fx.home+" v "+fx.away) + sb + playersBar + overstrip + main + renderPicker(fx, m, inn);
@@ -506,6 +518,14 @@ function renderPicker(fx, m, inn) {
       <button class="setupbtn" data-wicket="0" style="margin-bottom:10px">${t("outNoCross")}<br><span style="font-size:11px;color:#8a8472;font-weight:400">${t("outNoCrossSub")}</span></button>
       <button class="setupbtn" data-wicket="1" style="margin-bottom:10px">${t("outCross")}<br><span style="font-size:11px;color:#8a8472;font-weight:400">${t("outCrossSub")}</span></button>
       <button class="setupbtn" data-pick="runout">${t("runOut")}<br><span style="font-size:11px;color:#8a8472;font-weight:400">${t("runOutSub")}</span></button>`);
+  }
+  if (p === "reset") {
+    return modal(t("resetTitle"), `
+      <button class="setupbtn" data-pick="striker" style="margin-bottom:10px">${t("changeStriker")}<span class="chev">›</span></button>
+      <button class="setupbtn" data-pick="nonStriker" style="margin-bottom:10px">${t("changeNon")}<span class="chev">›</span></button>
+      <button class="setupbtn" data-pick="bowler" style="margin-bottom:10px">${t("changeBowler")}<span class="chev">›</span></button>
+      <button class="setupbtn" data-resetover="1" style="margin-bottom:10px">${t("resetOver")}<br><span style="font-size:11px;color:#8a8472;font-weight:400">${t("resetOverSub")}</span></button>
+      <button class="setupbtn" data-resetmatch="1" style="border:1.5px solid #e0b0a0">${t("resetMatch")}<br><span style="font-size:11px;color:#C0351A;font-weight:400">${t("resetMatchSub")}</span></button>`);
   }
   if (p === "runout") {
     return modal(t("runOutTitle"), `
@@ -649,6 +669,33 @@ function undo() {
   const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
   if (inn.balls.length === 0) return; inn.balls = inn.balls.slice(0,-1); m[key]=inn; UI_STATE.wicketPick=false; setMatch(m);
 }
+function resetOver() {
+  const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
+  // remove balls back to the start of the current (incomplete) over
+  const legalTotal = tally(inn).legal;
+  const completedOvers = Math.floor(legalTotal / 6);
+  const targetLegal = completedOvers * 6; // legal-ball count at the start of this over
+  let balls = [...inn.balls];
+  while (balls.length > 0) {
+    const legalNow = balls.filter(b => b.legal).length;
+    if (legalNow <= targetLegal) break;
+    balls.pop();
+  }
+  // also drop any trailing extras (wides/no-balls) that belong to this over
+  while (balls.length > 0 && !balls[balls.length-1].legal && balls.filter(b=>b.legal).length === targetLegal) {
+    balls.pop();
+  }
+  inn.balls = balls;
+  inn.bowler = null; // pick the bowler again for the redone over
+  UI_STATE.wicketPick = false; UI_STATE.picker = null;
+  m[key] = inn; setMatch(m);
+}
+function resetMatch() {
+  const m = {}; // wipe this match entirely
+  delete DATA[VIEW.id];
+  UI_STATE.wicketPick = false; UI_STATE.picker = null;
+  save(); render();
+}
 function endInnings() {
   const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = m[key];
   if (key === "innings1") { m.innings1 = { ...inn, done:true }; m.innings2 = freshInnings(inn.bowlingTeam, inn.battingTeam, m.overs); }
@@ -660,7 +707,7 @@ function endInnings() {
 function attach() {
   const app = document.getElementById("app");
   app.onclick = (e) => {
-    const el = e.target.closest("[data-back],[data-open],[data-overs],[data-batfirst],[data-pick],[data-run],[data-wicket],[data-runout],[data-roout],[data-undo],[data-endinnings],[data-assign],[data-wide],[data-noball],[data-closemodal],[data-stop],[data-share],[data-reopen],[data-lang]");
+    const el = e.target.closest("[data-back],[data-open],[data-overs],[data-batfirst],[data-pick],[data-run],[data-wicket],[data-runout],[data-roout],[data-undo],[data-endinnings],[data-assign],[data-wide],[data-noball],[data-closemodal],[data-stop],[data-share],[data-reopen],[data-lang],[data-resetover],[data-resetmatch]");
     if (!el) return;
     const d = el.dataset;
 
@@ -676,7 +723,22 @@ function attach() {
       const m = getMatch(); m.overs = UI_STATE.overs; m.innings1 = freshInnings(d.batfirst, bowlFirst, UI_STATE.overs);
       return setMatch(m);
     }
-    if (d.pick !== undefined) { VIEW.scrollTop = window.scrollY; UI_STATE.picker = d.pick; return render(); }
+    if (d.pick !== undefined) {
+      VIEW.scrollTop = window.scrollY;
+      // If changing an already-filled batting/bowling slot, clear it first so the
+      // current occupant becomes selectable again in the picker.
+      if (d.pick === "striker" || d.pick === "nonStriker" || d.pick === "bowler") {
+        const m = getMatch(); const key = m.innings2?"innings2":"innings1";
+        if (m[key] && m[key][d.pick]) { const inn = { ...m[key] }; inn[d.pick] = null; m[key] = inn; DATA[VIEW.id] = m; }
+      }
+      UI_STATE.picker = d.pick; return render();
+    }
+    if (d.resetover !== undefined) { VIEW.scrollTop = window.scrollY; resetOver(); return; }
+    if (d.resetmatch !== undefined) {
+      if (confirm(t("confirmReset"))) { resetMatch(); }
+      else { UI_STATE.picker = null; render(); }
+      return;
+    }
     if (d.closemodal !== undefined) { UI_STATE.picker = null; return render(); }
     if (d.run !== undefined) { VIEW.scrollTop = window.scrollY; recordBall({ legal:true, runs:+d.run }); return; }
     if (d.wicket !== undefined) { VIEW.scrollTop = window.scrollY; recordWicket(d.wicket === "1"); return; }
