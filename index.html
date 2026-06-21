@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#D6EEFF">
+<title>Battle of the Offices · Cricket Scorer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --font: Georgia, 'Times New Roman', serif;
+    --ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --cream: #FDF6E3; --ink: #2C3E50; --gold: #C8860A; --green: #3A8C4E; --red: #C0351A;
+  }
+  html, body { background: var(--cream); font-family: var(--ui); color: #444; }
+  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--cream); }
+  button { font-family: var(--ui); cursor: pointer; border: none; }
+  input { font-family: var(--ui); }
+  .hide { display: none !important; }
+
+  .header { background: linear-gradient(#D6EEFF, #FDF6E3); padding: 22px 18px 16px; text-align: center; }
+  .eyebrow { font-size: 10px; letter-spacing: 3px; color: #5AAD5E; font-weight: 600; }
+  .title { font-family: var(--font); font-size: 26px; font-weight: 700; color: var(--ink); margin-top: 4px; }
+  .sub { font-size: 12px; color: #7A8B6F; margin-top: 5px; }
+  .body { padding: 0 14px 30px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px;
+    background: var(--cream); border-bottom: 1px solid #ece4d0; position: sticky; top: 0; z-index: 10; }
+  .backbtn { background: none; color: #3A86C8; font-size: 15px; font-weight: 600; width: 64px; text-align: left; }
+  .topbar .t { font-weight: 700; color: var(--ink); font-size: 15px; }
+
+  .label { font-family: var(--font); font-size: 15px; font-weight: 700; color: var(--gold); margin: 18px 2px 8px; }
+  .card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .row { display: flex; align-items: center; padding: 11px 12px; border-bottom: 1px solid #f4efe2; font-size: 13px; color: #555; }
+  .row:last-child { border-bottom: none; }
+  .row.head { background: #fbf6e9; font-size: 11px; color: #b0a070; font-weight: 700; }
+  .c { width: 26px; text-align: center; }
+  .dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; display: inline-block; }
+  .gold0 { background: #FFF8E6; }
+
+  .notice { background: #FFF8E6; border: 1px solid #F0E0A0; border-radius: 12px; padding: 10px 14px; font-size: 13px; color: #7A6030; margin-top: 12px; }
+  .fine { font-size: 11px; color: #b0a890; text-align: center; margin: 12px 8px 0; line-height: 1.5; }
+
+  .matchcard { display: flex; align-items: center; width: 100%; background: #fff; border-radius: 14px;
+    padding: 12px 14px 12px 0; margin-bottom: 9px; box-shadow: 0 1px 3px rgba(0,0,0,.06); text-align: left; overflow: hidden; }
+  .accent { width: 5px; align-self: stretch; border-radius: 3px; margin-right: 13px; min-height: 48px; }
+  .pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+  .pill.done { background: #E8F0E8; color: var(--green); }
+  .pill.live { background: #FDECEA; color: var(--red); }
+  .chev { color: #ccc; font-size: 22px; padding-left: 6px; }
+
+  .oversbtn { flex: 1; padding: 14px 0; border: 1.5px solid #e6ddc4; background: #fff; border-radius: 12px; font-size: 17px; font-weight: 700; color: #888; }
+  .oversbtn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .bigchoice { display: flex; align-items: center; gap: 12px; width: 100%; background: #fff; border-radius: 14px;
+    padding: 18px 16px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.06); text-align: left; }
+
+  .scoreboard { margin: 10px 14px 0; border-radius: 16px; padding: 14px 18px; }
+  .sb-team { font-size: 13px; font-weight: 700; }
+  .sb-score { font-size: 40px; font-weight: 800; font-family: var(--font); }
+  .sb-ov { font-size: 15px; color: #8a8472; }
+  .sb-target { font-size: 13px; color: var(--gold); font-weight: 700; margin-top: 2px; }
+
+  .playersbar { display: flex; gap: 8px; padding: 12px 14px 4px; }
+  .chip { flex: 1; background: #fff; border-radius: 12px; padding: 9px 10px; text-align: left; box-shadow: 0 1px 2px rgba(0,0,0,.05); min-width: 0; }
+  .chip .lbl { font-size: 10px; color: #b0a890; letter-spacing: .5px; }
+  .chip .nm { font-size: 14px; font-weight: 700; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip .fig { font-size: 11px; color: #8a8472; }
+
+  .overstrip { display: flex; align-items: center; gap: 5px; padding: 8px 16px 4px; flex-wrap: wrap; }
+  .balldot { min-width: 24px; height: 24px; border-radius: 12px; display: inline-flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 700; padding: 0 4px; }
+
+  .pad { padding: 8px 14px 24px; }
+  .runrow { display: flex; gap: 8px; margin-bottom: 8px; }
+  .runbtn { flex: 1; padding: 20px 0; border-radius: 14px; background: #fff; font-size: 22px; font-weight: 800;
+    color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); font-family: var(--font); }
+  .runbtn.green { background: var(--green); color: #fff; }
+  .runbtn.red { background: var(--red); color: #fff; }
+  .extrarow { display: flex; gap: 8px; margin-top: 4px; }
+  .extrabtn { flex: 1; padding: 15px 0; border: 1.5px solid #E8C98D; background: #FFF8E6; border-radius: 12px; font-size: 14px; font-weight: 700; color: #A07020; }
+  .undobtn { flex: 1; padding: 15px 0; border: 1.5px solid #ddd; background: #fff; border-radius: 12px; font-size: 14px; font-weight: 700; color: #888; }
+  .endearly { width: 100%; margin-top: 14px; padding: 12px 0; background: none; color: #b0a890; font-size: 13px; text-decoration: underline; }
+
+  .hint { background: #FFF8E6; border: 1px solid #F0E0A0; border-radius: 12px; padding: 12px 14px; font-size: 14px;
+    color: #7A6030; margin: 14px 0 12px; text-align: center; font-weight: 600; }
+  .setupbtn { display: flex; align-items: center; justify-content: space-between; width: 100%; background: #fff;
+    border-radius: 12px; padding: 16px; margin-bottom: 10px; font-size: 15px; font-weight: 700; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+
+  .endbox { background: #fff; border-radius: 14px; padding: 18px 16px; text-align: center; margin-top: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .primarybtn { width: 100%; margin-top: 12px; padding: 16px 0; background: var(--ink); color: #fff; border-radius: 13px; font-size: 15px; font-weight: 700; }
+  .ghostbtn { width: 100%; margin-top: 10px; padding: 13px 0; border: 1.5px solid #ddd; background: #fff; color: #888; border-radius: 12px; font-size: 14px; font-weight: 700; }
+  .sharebtn { width: 100%; margin-top: 10px; padding: 14px 0; background: var(--green); color: #fff; border-radius: 13px; font-size: 15px; font-weight: 700; }
+
+  .resulthero { background: #fff; border-radius: 16px; padding: 22px 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+
+  .overlay { position: fixed; inset: 0; background: rgba(20,20,20,.45); display: flex; align-items: flex-end; justify-content: center; z-index: 50; }
+  .modal { width: 100%; max-width: 480px; max-height: 82vh; background: var(--cream); border-radius: 18px 18px 0 0; padding: 8px 16px 24px; display: flex; flex-direction: column; }
+  .handle { width: 40px; height: 4px; border-radius: 2px; background: #d8cfb8; margin: 4px auto 8px; }
+  .modal .mh { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 12px; }
+  .modal .mh b { font-size: 16px; color: var(--ink); }
+  .closebtn { background: #ece6d6; width: 30px; height: 30px; border-radius: 15px; color: #888; font-size: 14px; }
+  .pickrow { display: flex; align-items: center; gap: 10px; width: 100%; background: #fff; border-radius: 11px; padding: 14px; margin-bottom: 7px; text-align: left; }
+  .mscroll { overflow-y: auto; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff;
+    padding: 10px 22px; border-radius: 22px; font-size: 13px; font-weight: 600; z-index: 60; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+  .splash { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────
+const TEAMS = {
+  Gladiators: { color: "#3A86C8", soft: "#EBF4FF", text: "#1A4A7A" },
+  Mavericks:  { color: "#2C2C2C", soft: "#EDEDED", text: "#1A1A1A" },
+  Assassins:  { color: "#C0351A", soft: "#FFF0EE", text: "#7A1A0A" },
+};
+const ROSTERS = {
+  Gladiators: ["Udayanga", "Avinash", "Ashik (C)", "Ashen", "Zain", "Kavisha", "Rasangi"],
+  Mavericks:  ["Dhammika", "Fayas", "Suji", "Hasitha", "Senel (C)", "Suyama", "Samila"],
+  Assassins:  ["Vidith", "Shehan", "Akila", "Kana (C)", "Swapnil", "Naouman", "Buddhima"],
+};
+const FIXTURES = [
+  { id: "m1", round: "Group", home: "Gladiators", away: "Assassins", umpire: "Mavericks" },
+  { id: "m2", round: "Group", home: "Mavericks",  away: "Gladiators", umpire: "Assassins" },
+  { id: "m3", round: "Group", home: "Assassins",  away: "Mavericks",  umpire: "Gladiators" },
+  { id: "m4", round: "Rematch", home: "Assassins",  away: "Gladiators", umpire: "Mavericks" },
+  { id: "m5", round: "Rematch", home: "Gladiators", away: "Mavericks",  umpire: "Assassins" },
+  { id: "m6", round: "Rematch", home: "Mavericks",  away: "Assassins",  umpire: "Gladiators" },
+];
+const DEFAULT_OVERS = 5;
+const STORAGE_KEY = "botoffices_bbb_v1";
+
+// ── State + storage ─────────────────────────────────────────────────
+let DATA = {};
+let VIEW = { name: "home" };
+let UI_STATE = { picker: null, wicketPick: false, overs: DEFAULT_OVERS };
+
+function load() { try { DATA = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { DATA = {}; } }
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); flash("Saved"); } catch { flash("Save failed"); } }
+
+function freshInnings(bat, bowl, overs) {
+  return { battingTeam: bat, bowlingTeam: bowl, overs, balls: [], striker: null, nonStriker: null, bowler: null, done: false };
+}
+
+function tally(inn) {
+  let runs = 0, wkts = 0, legal = 0; const bat = {}, bowl = {};
+  inn.balls.forEach((b) => {
+    runs += b.runs + b.extra;
+    if (b.striker) { bat[b.striker] = bat[b.striker] || { runs: 0, balls: 0, out: false };
+      bat[b.striker].runs += b.runs; if (b.legal) bat[b.striker].balls += 1; }
+    if (b.bowler) { bowl[b.bowler] = bowl[b.bowler] || { balls: 0, runs: 0, wkts: 0 };
+      if (b.legal) bowl[b.bowler].balls += 1; bowl[b.bowler].runs += b.runs + b.extra; if (b.wicket) bowl[b.bowler].wkts += 1; }
+    if (b.wicket && b.outName) { bat[b.outName] = bat[b.outName] || { runs: 0, balls: 0, out: false }; bat[b.outName].out = true; }
+    if (b.legal) legal += 1; if (b.wicket) wkts += 1;
+  });
+  return { runs, wkts, legal, bat, bowl, oversText: Math.floor(legal/6) + "." + (legal%6) };
+}
+
+// ── Toast ───────────────────────────────────────────────────────────
+let toastTimer;
+function flash(msg) {
+  let el = document.getElementById("toast");
+  if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; document.body.appendChild(el); }
+  el.textContent = msg; el.style.display = "block";
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.style.display = "none"; }, 1200);
+}
+
+// ── Helpers for HTML ────────────────────────────────────────────────
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[c]));
+const dot = (c, big) => `<span class="dot" style="background:${c};${big?"width:12px;height:12px;":""}"></span>`;
+
+// ── Render router ───────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById("app");
+  if (VIEW.name === "home") app.innerHTML = renderHome();
+  else if (VIEW.name === "match") app.innerHTML = renderMatch();
+  attach();
+  if (VIEW.scrollTop != null) { window.scrollTo(0, VIEW.scrollTop); VIEW.scrollTop = null; }
+}
+
+// ── HOME ────────────────────────────────────────────────────────────
+function computeStandings() {
+  const t = {};
+  Object.keys(TEAMS).forEach(k => t[k] = { team:k, P:0,W:0,L:0,D:0,rf:0,ra:0,pts:0 });
+  FIXTURES.forEach(fx => {
+    const m = DATA[fx.id]; if (!m || !m.complete || !m.innings1 || !m.innings2) return;
+    const sA = tally(m.innings1).runs, sB = tally(m.innings2).runs;
+    const A = m.innings1.battingTeam, B = m.innings2.battingTeam;
+    t[A].P++; t[B].P++; t[A].rf+=sA; t[A].ra+=sB; t[B].rf+=sB; t[B].ra+=sA;
+    if (sA>sB){t[A].W++;t[B].L++;t[A].pts+=2;} else if (sB>sA){t[B].W++;t[A].L++;t[B].pts+=2;} else {t[A].D++;t[B].D++;t[A].pts++;t[B].pts++;}
+  });
+  return Object.values(t).sort((x,y)=> y.pts-x.pts || (y.rf-y.ra)-(x.rf-x.ra) || y.rf-x.rf);
+}
+function computeLeaders() {
+  const bat = {}, bowl = {};
+  FIXTURES.forEach(fx => { const m = DATA[fx.id]; if (!m) return;
+    [m.innings1, m.innings2].forEach(inn => { if (!inn) return; const tl = tally(inn);
+      Object.entries(tl.bat).forEach(([n,v])=>{ bat[n]=bat[n]||{name:n,team:inn.battingTeam,runs:0,balls:0}; bat[n].runs+=v.runs; bat[n].balls+=v.balls; });
+      Object.entries(tl.bowl).forEach(([n,v])=>{ bowl[n]=bowl[n]||{name:n,team:inn.bowlingTeam,wkts:0,runs:0,balls:0}; bowl[n].wkts+=v.wkts; bowl[n].runs+=v.runs; bowl[n].balls+=v.balls; });
+    });
+  });
+  return {
+    topBat: Object.values(bat).filter(b=>b.runs>0).sort((a,b)=>b.runs-a.runs).slice(0,5),
+    topBowl: Object.values(bowl).filter(b=>b.wkts>0).sort((a,b)=>b.wkts-a.wkts||a.runs-b.runs).slice(0,5),
+    economical: Object.values(bowl).filter(b=>b.balls>=6).sort((a,b)=>(a.runs/a.balls)-(b.runs/b.balls)).slice(0,5),
+  };
+}
+
+function renderHome() {
+  const st = computeStandings();
+  const ld = computeLeaders();
+  const played = FIXTURES.filter(f => DATA[f.id]?.complete).length;
+
+  let matches = FIXTURES.map(fx => {
+    const m = DATA[fx.id]; const live = m && !m.complete && m.innings1; const h = TEAMS[fx.home];
+    let line = "Tap to start scoring";
+    if (m?.complete) { const s1=tally(m.innings1), s2=tally(m.innings2);
+      line = `${m.innings1.battingTeam} ${s1.runs}/${s1.wkts} — ${m.innings2.battingTeam} ${s2.runs}/${s2.wkts}`; }
+    else if (m?.innings1) { const inn = m.innings2||m.innings1, s=tally(inn);
+      line = `Live · ${inn.battingTeam} ${s.runs}/${s.wkts} (${s.oversText})`; }
+    return `<button class="matchcard" data-open="${fx.id}">
+      <div class="accent" style="background:${h.color}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b style="font-size:15px;color:var(--ink)">${fx.home} v ${fx.away}</b>
+          ${m?.complete?'<span class="pill done">Done</span>':live?'<span class="pill live">● Live</span>':''}
+        </div>
+        <div style="font-size:12px;color:#8a8472;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(line)}</div>
+        <div style="font-size:11px;color:#b8a878;margin-top:2px">${fx.round} · Umpire ${fx.umpire}</div>
+      </div><span class="chev">›</span></button>`;
+  }).join("");
+
+  const tableRows = st.map((s,i)=>`<div class="row ${i<2?'gold0':''}">
+    <span style="width:18px;font-weight:700;color:${i<2?'var(--gold)':'#ccc'}">${i+1}</span>
+    <span style="flex:1;display:flex;align-items:center;gap:7px">${dot(TEAMS[s.team].color)}<b style="color:${TEAMS[s.team].text};font-size:14px">${s.team}</b></span>
+    <span class="c">${s.P}</span><span class="c">${s.W}</span><span class="c">${s.L}</span>
+    <span class="c" style="width:36px;font-weight:800;color:var(--ink)">${s.pts}</span></div>`).join("");
+
+  const statsBlock = (ld.topBat.length||ld.topBowl.length||ld.economical.length) ? `
+    <div class="label">Most Runs</div><div class="card">${
+      ld.topBat.map((b,i)=>`<div class="row ${i===0?'gold0':''}"><span style="width:16px;font-weight:700;color:${i===0?'var(--gold)':'#ccc'}">${i+1}</span>
+        <span style="flex:1;display:flex;gap:6px;align-items:center">${dot(TEAMS[b.team].color)}<span style="font-size:14px;color:var(--ink)">${b.name}</span></span>
+        <b style="color:var(--ink)">${b.runs}</b></div>`).join("")||'<div class="row" style="color:#c0b8a0;justify-content:center">Nothing yet</div>'
+    }</div>
+    <div class="label">Most Wickets</div><div class="card">${
+      ld.topBowl.map((b,i)=>`<div class="row ${i===0?'gold0':''}"><span style="width:16px;font-weight:700;color:${i===0?'var(--gold)':'#ccc'}">${i+1}</span>
+        <span style="flex:1;display:flex;gap:6px;align-items:center">${dot(TEAMS[b.team].color)}<span style="font-size:14px;color:var(--ink)">${b.name}</span></span>
+        <span style="color:#aaa;font-size:12px;width:70px;text-align:right">${Math.floor(b.balls/6)}.${b.balls%6} ov</span>
+        <b style="color:var(--ink);width:36px;text-align:right">${b.wkts}w</b></div>`).join("")||'<div class="row" style="color:#c0b8a0;justify-content:center">Nothing yet</div>'
+    }</div>
+    <div class="label">Most Economical</div><div class="card">${
+      ld.economical.length? ld.economical.map((b,i)=>`<div class="row ${i===0?'gold0':''}"><span style="width:16px;font-weight:700;color:${i===0?'var(--gold)':'#ccc'}">${i+1}</span>
+        <span style="flex:1;display:flex;gap:6px;align-items:center">${dot(TEAMS[b.team].color)}<span style="font-size:14px;color:var(--ink)">${b.name}</span></span>
+        <span style="color:#aaa;font-size:12px;width:78px;text-align:right">${Math.floor(b.balls/6)}.${b.balls%6} ov · ${b.runs}r</span>
+        <b style="color:var(--green);width:44px;text-align:right">${(b.runs/b.balls*6).toFixed(1)}</b></div>`).join("")
+        : '<div class="row" style="color:#c0b8a0;justify-content:center">Need at least 1 full over bowled</div>'
+    }</div>
+    <div class="fine">Most Economical = fewest runs per over (min 1 over bowled).</div>` : "";
+
+  return `<div class="header">
+      <div class="eyebrow">OFFICE CRICKET CHAMPIONSHIP</div>
+      <div class="title">Battle of the Offices</div>
+      <div class="sub">Live ball-by-ball scoring · ${played}/${FIXTURES.length} done</div>
+    </div>
+    <div class="body">
+      <div class="label">Points Table</div>
+      <div class="card">
+        <div class="row head"><span style="width:18px">#</span><span style="flex:1">Team</span>
+          <span class="c">P</span><span class="c">W</span><span class="c">L</span><span class="c" style="width:36px;font-weight:800">Pts</span></div>
+        ${tableRows}
+      </div>
+      <div class="notice"><b style="color:var(--gold)">🏆 Top 2</b> reach the Grand Final · Win 2 · Draw 1</div>
+      <div class="label">Matches</div>
+      ${matches}
+      ${statsBlock}
+    </div>`;
+}
+
+// ── MATCH ───────────────────────────────────────────────────────────
+function getMatch() { return DATA[VIEW.id] || {}; }
+function setMatch(m) { DATA[VIEW.id] = m; save(); render(); }
+
+function renderMatch() {
+  const fx = FIXTURES.find(f => f.id === VIEW.id);
+  const m = getMatch();
+  if (!m.innings1) return renderToss(fx);
+  if (m.complete) return renderResult(fx, m);
+  return renderLive(fx, m);
+}
+
+function renderToss(fx) {
+  const overs = UI_STATE.overs;
+  const oBtns = [3,4,5,6,8].map(o=>`<button class="oversbtn ${overs===o?'on':''}" data-overs="${o}">${o}</button>`).join("");
+  const teams = [fx.home, fx.away].map(team=>`<button class="bigchoice" data-batfirst="${team}">
+      ${dot(TEAMS[team].color,true)}<span style="font-size:17px;font-weight:700;color:${TEAMS[team].text}">${team} bats first</span>
+      <span class="chev" style="margin-left:auto">›</span></button>`).join("");
+  return `${topbar(fx.home+" v "+fx.away)}
+    <div class="body" style="padding-top:20px">
+      <div class="label">Overs per innings</div>
+      <div style="display:flex;gap:8px">${oBtns}</div>
+      <div class="label">Who bats first?</div>
+      ${teams}
+      <div class="fine">Umpire: ${fx.umpire} · ${fx.round}</div>
+    </div>`;
+}
+
+function renderLive(fx, m) {
+  const key = m.innings2 ? "innings2" : "innings1";
+  const inn = m[key];
+  const target = m.innings2 ? tally(m.innings1).runs + 1 : null;
+  const isSecond = !!m.innings2;
+  const t = tally(inn);
+  const battingRoster = ROSTERS[inn.battingTeam];
+  const teamC = TEAMS[inn.battingTeam];
+
+  const needStriker = !inn.striker, needNon = !inn.nonStriker, needBowler = !inn.bowler;
+  const allOut = t.wkts >= battingRoster.length - 1;
+  const oversUp = t.legal >= inn.overs * 6;
+  const inningsOver = allOut || oversUp;
+  const chased = isSecond && target && t.runs >= target;
+
+  const sb = `<div class="scoreboard" style="background:${teamC.soft}">
+      <div class="sb-team" style="color:${teamC.text}">${inn.battingTeam} ${isSecond?"(chasing)":"batting"}</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:2px">
+        <span class="sb-score" style="color:${teamC.text}">${t.runs}/${t.wkts}</span>
+        <span class="sb-ov">(${t.oversText}/${inn.overs} ov)</span></div>
+      ${isSecond&&target?`<div class="sb-target">Need ${Math.max(0,target-t.runs)} from ${Math.max(0,inn.overs*6-t.legal)} balls · Target ${target}</div>`:""}
+    </div>`;
+
+  const chip = (lbl, name, sub, star) => `<button class="chip" data-pick="${star===2?'bowler':star===1?'striker':'nonStriker'}">
+      <div class="lbl">${star===1?"🏏 ":""}${lbl}</div>
+      <div class="nm" style="color:${name?'var(--ink)':'#c8bfa8'}">${name?esc(name):"Tap to set"}</div>
+      ${sub?`<div class="fig">${sub}</div>`:""}</button>`;
+  const stF = inn.striker ? `${t.bat[inn.striker]?.runs??0} (${t.bat[inn.striker]?.balls??0})` : "";
+  const nsF = inn.nonStriker ? `${t.bat[inn.nonStriker]?.runs??0} (${t.bat[inn.nonStriker]?.balls??0})` : "";
+  const bwF = inn.bowler ? (()=>{const f=t.bowl[inn.bowler]||{wkts:0,runs:0,balls:0};return `${f.wkts}-${f.runs} (${Math.floor(f.balls/6)}.${f.balls%6})`;})() : "";
+  const playersBar = `<div class="playersbar">
+      ${chip("Striker", inn.striker, stF, 1)}
+      ${chip("Non-striker", inn.nonStriker, nsF, 0)}
+      ${chip("Bowler", inn.bowler, bwF, 2)}</div>`;
+
+  const dots = inn.balls.slice(-8).map(b=>{
+    const bg = b.wicket?"#C0351A":b.extra?"#E8A33D":b.runs===0?"#ece4d0":"#3A8C4E";
+    const col = (b.wicket||b.runs>0||b.extra)?"#fff":"#999";
+    const txt = b.wicket?"W":b.extra?(b.runs?`${b.runs}+e`:"e"):b.runs;
+    return `<span class="balldot" style="background:${bg};color:${col}">${txt}</span>`;
+  }).join("") || '<span style="font-size:12px;color:#ccc">no balls yet</span>';
+  const overstrip = `<div class="overstrip"><span style="font-size:11px;color:#b0a890;margin-right:6px">Recent:</span>${dots}</div>`;
+
+  let main;
+  if (inningsOver || chased) {
+    main = `<div class="body">
+      <div class="endbox"><div style="font-size:16px;font-weight:700;color:var(--ink)">${chased?inn.battingTeam+" won! 🎉":allOut?"All out!":"Overs complete"}</div>
+        <div style="font-size:13px;color:#8a8472;margin-top:4px">${inn.battingTeam} ${t.runs}/${t.wkts} in ${t.oversText} overs</div></div>
+      <button class="primarybtn" data-endinnings="1">${isSecond?"Finish match & see result":"End innings → start 2nd innings"}</button>
+      <button class="ghostbtn" data-undo="1">Undo last ball</button></div>`;
+  } else if (UI_STATE.wicketPick || needStriker || needNon || needBowler) {
+    const hint = UI_STATE.wicketPick ? "Wicket! Pick the new batsman."
+      : (needBowler && !needStriker && !needNon) ? "Over done — pick the next bowler."
+      : "Set the batsmen and bowler to begin.";
+    let btns = "";
+    if (needStriker || UI_STATE.wicketPick) btns += `<button class="setupbtn" data-pick="striker">Choose new batsman<span class="chev">›</span></button>`;
+    if (needNon && !UI_STATE.wicketPick) btns += `<button class="setupbtn" data-pick="nonStriker">Choose non-striker<span class="chev">›</span></button>`;
+    if (needBowler && !UI_STATE.wicketPick) btns += `<button class="setupbtn" data-pick="bowler">Choose bowler<span class="chev">›</span></button>`;
+    if (inn.balls.length>0) btns += `<button class="ghostbtn" data-undo="1">Undo last ball</button>`;
+    main = `<div class="body"><div class="hint">${hint}</div>${btns}</div>`;
+  } else {
+    main = `<div class="pad">
+      <div class="runrow">${[0,1,2,3].map(r=>`<button class="runbtn" data-run="${r}">${r}</button>`).join("")}</div>
+      <div class="runrow">${[4,6].map(r=>`<button class="runbtn green" data-run="${r}">${r}</button>`).join("")}
+        <button class="runbtn red" style="flex:2" data-wicket="1">WICKET</button></div>
+      <div class="extrarow">
+        <button class="extrabtn" data-pick="wide">Wide</button>
+        <button class="extrabtn" data-pick="noball">No-ball</button>
+        <button class="undobtn" data-undo="1">↶ Undo</button></div>
+      <button class="endearly" data-endinnings="1">End innings early</button></div>`;
+  }
+
+  return topbar(fx.home+" v "+fx.away) + sb + playersBar + overstrip + main + renderPicker(fx, m, inn);
+}
+
+function renderPicker(fx, m, inn) {
+  const p = UI_STATE.picker; if (!p) return "";
+  if (p === "wide") {
+    return modal("Wide — how many did they run?", `
+      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">+1 for the wide is added automatically and the ball is re-bowled. Add any runs the batters ran (these don't go to the batsman). Tap 0 for a normal wide.</div>
+      <div class="runrow">${[0,1,2,3,4].map(r=>`<button class="runbtn" data-wide="${r}">${r}</button>`).join("")}</div>`);
+  }
+  if (p === "noball") {
+    return modal("No-ball — runs off the bat?", `
+      <div style="font-size:13px;color:#8a8472;margin-bottom:10px">+1 for the no-ball is added automatically and the ball is re-bowled. Pick any runs the batsman scored.</div>
+      <div class="runrow">${[0,1,2,3,4,6].map(r=>`<button class="runbtn" data-noball="${r}">${r}</button>`).join("")}</div>`);
+  }
+  // player picker
+  const isBowler = p === "bowler";
+  const roster = isBowler ? ROSTERS[inn.bowlingTeam] : ROSTERS[inn.battingTeam];
+  const t = tally(inn);
+  const used = [inn.striker, inn.nonStriker].filter(Boolean);
+  const outNames = Object.entries(t.bat).filter(([,v])=>v.out).map(([n])=>n);
+  const title = p==="striker"?"Choose batsman":p==="nonStriker"?"Choose non-striker":"Choose bowler";
+  const rows = roster.map(pl=>{
+    const dis = !isBowler && (used.includes(pl) || outNames.includes(pl));
+    const teamColor = TEAMS[isBowler?inn.bowlingTeam:inn.battingTeam].color;
+    let tag = "";
+    if (outNames.includes(pl)) tag = `<span style="font-size:11px;color:var(--red);margin-left:auto">out</span>`;
+    else if (used.includes(pl)) tag = `<span style="font-size:11px;color:#aaa;margin-left:auto">at crease</span>`;
+    return `<button class="pickrow" data-assign="${p}" data-name="${esc(pl)}" ${dis?'disabled style="opacity:.35"':''}>
+      ${dot(teamColor)}<span style="font-size:15px">${esc(pl)}</span>${tag}</button>`;
+  }).join("");
+  return modal(title, `<div class="mscroll">${rows}</div>`);
+}
+
+function renderResult(fx, m) {
+  const s1 = tally(m.innings1), s2 = tally(m.innings2);
+  const r1 = s1.runs, r2 = s2.runs;
+  const winner = r1>r2 ? m.innings1.battingTeam : r2>r1 ? m.innings2.battingTeam : null;
+  const margin = winner ? (winner===m.innings2.battingTeam
+    ? `by ${ROSTERS[winner].length-1-s2.wkts} wickets` : `by ${r1-r2} runs`) : "Match tied";
+
+  const innBlock = (inn)=>{ const tl=tally(inn), tt=TEAMS[inn.battingTeam];
+    const batRows = Object.entries(tl.bat).filter(([,v])=>v.balls>0||v.runs>0||v.out).map(([n,v])=>`<div class="row">
+        <span style="flex:1;font-size:13px">${esc(n)}${!v.out?'<span style="color:var(--green);font-size:11px"> not out</span>':''}</span>
+        <span style="color:#888;font-size:12px;width:50px;text-align:right">${v.balls}b</span>
+        <b style="width:40px;text-align:right;color:var(--ink)">${v.runs}</b></div>`).join("");
+    const bowlRows = Object.entries(tl.bowl).map(([n,v])=>`<div class="row">
+        <span style="flex:1;font-size:13px">${esc(n)}</span>
+        <span style="color:#888;font-size:12px;width:70px;text-align:right">${Math.floor(v.balls/6)}.${v.balls%6} ov</span>
+        <span style="color:#888;font-size:12px;width:46px;text-align:right">${v.runs}r</span>
+        <b style="width:36px;text-align:right;color:var(--ink)">${v.wkts}w</b></div>`).join("");
+    return `<div style="margin-top:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">${dot(tt.color)}<b style="color:${tt.text};font-size:15px">${inn.battingTeam}</b>
+        <b style="margin-left:auto;color:var(--ink)">${tl.runs}/${tl.wkts}</b><span style="color:#aaa;font-size:13px">(${tl.oversText})</span></div>
+      <div class="card">${batRows}</div>
+      <div style="font-size:11px;color:#b0a890;margin:6px 2px 0">Bowling</div>
+      <div class="card">${bowlRows}</div></div>`; };
+
+  return `${topbar("Result")}
+    <div class="body" style="padding-top:18px">
+      <div class="resulthero"><div style="font-size:12px;color:#b0a890;letter-spacing:1px">${fx.round.toUpperCase()}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--gold);font-family:var(--font);margin:6px 0">${winner?winner+" won":"Match tied"}</div>
+        ${winner?`<div style="font-size:13px;color:#8a8472">${margin}</div>`:""}</div>
+      ${innBlock(m.innings1)}${innBlock(m.innings2)}
+      <button class="sharebtn" data-share="1">📤 Share result (WhatsApp)</button>
+      <button class="ghostbtn" data-reopen="1" style="margin-top:10px">Reopen / fix scoring</button>
+    </div>`;
+}
+
+function topbar(title) {
+  return `<div class="topbar"><button class="backbtn" data-back="1">‹ Back</button><span class="t">${esc(title)}</span><span style="width:64px"></span></div>`;
+}
+function modal(title, inner) {
+  return `<div class="overlay" data-closemodal="1"><div class="modal" data-stop="1">
+    <div class="handle"></div><div class="mh"><b>${esc(title)}</b><button class="closebtn" data-closemodal="1">✕</button></div>
+    ${inner}</div></div>`;
+}
+
+// ── Build share text ────────────────────────────────────────────────
+function shareText(fx, m) {
+  const s1 = tally(m.innings1), s2 = tally(m.innings2);
+  const winner = s1.runs>s2.runs ? m.innings1.battingTeam : s2.runs>s1.runs ? m.innings2.battingTeam : null;
+  const margin = winner ? (winner===m.innings2.battingTeam ? `by ${ROSTERS[winner].length-1-s2.wkts} wkts` : `by ${s1.runs-s2.runs} runs`) : "Match tied";
+  const topBat = (inn)=>{ const tl=tally(inn); const top=Object.entries(tl.bat).sort((a,b)=>b[1].runs-a[1].runs)[0];
+    return top&&top[1].runs>0?`Top scorer: ${top[0]} ${top[1].runs}(${top[1].balls})`:""; };
+  const topBowl = (inn)=>{ const tl=tally(inn); const top=Object.entries(tl.bowl).sort((a,b)=>b[1].wkts-a[1].wkts||a[1].runs-b[1].runs)[0];
+    return top&&(top[1].wkts>0||top[1].balls>0)?`Best bowler: ${top[0]} ${top[1].wkts}-${top[1].runs}`:""; };
+  return [
+    `🏏 Battle of the Offices — ${fx.round}`,
+    `${m.innings1.battingTeam} ${s1.runs}/${s1.wkts} (${s1.oversText})`,
+    `${m.innings2.battingTeam} ${s2.runs}/${s2.wkts} (${s2.oversText})`,
+    ``,
+    winner ? `🏆 ${winner} won ${margin}` : `🤝 ${margin}`,
+    ``,
+    topBat(s1.runs>=s2.runs?m.innings1:m.innings2),
+    topBowl(m.innings2), // bowlers of side that bowled 2nd-batting... keep simple
+  ].filter(Boolean).join("\n");
+}
+
+// ── Actions ─────────────────────────────────────────────────────────
+function recordBall(ball) {
+  const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
+  inn.balls = [...inn.balls, { legal: ball.legal, runs: ball.runs||0, extra: ball.extra||0, wicket: false,
+    striker: inn.striker, bowler: inn.bowler, outName: null }];
+  if (ball.legal && (ball.runs % 2 === 1)) { const s=inn.striker; inn.striker=inn.nonStriker; inn.nonStriker=s; }
+  const nl = tally(inn).legal;
+  if (ball.legal && nl % 6 === 0) { const s=inn.striker; inn.striker=inn.nonStriker; inn.nonStriker=s; inn.bowler=null; }
+  m[key] = inn; setMatch(m);
+}
+function recordWicket() {
+  const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
+  inn.balls = [...inn.balls, { legal:true, runs:0, extra:0, wicket:true, striker:inn.striker, bowler:inn.bowler, outName:inn.striker }];
+  inn.striker = null;
+  const nl = tally(inn).legal; if (nl % 6 === 0) inn.bowler = null;
+  m[key] = inn; UI_STATE.wicketPick = true; setMatch(m);
+}
+function undo() {
+  const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = { ...m[key] };
+  if (inn.balls.length === 0) return; inn.balls = inn.balls.slice(0,-1); m[key]=inn; UI_STATE.wicketPick=false; setMatch(m);
+}
+function endInnings() {
+  const m = getMatch(); const key = m.innings2 ? "innings2" : "innings1"; const inn = m[key];
+  if (key === "innings1") { m.innings1 = { ...inn, done:true }; m.innings2 = freshInnings(inn.bowlingTeam, inn.battingTeam, m.overs); }
+  else { m[key] = { ...inn, done:true }; m.complete = true; }
+  UI_STATE.wicketPick = false; setMatch(m);
+}
+
+// ── Event delegation ────────────────────────────────────────────────
+function attach() {
+  const app = document.getElementById("app");
+  app.onclick = (e) => {
+    const el = e.target.closest("[data-back],[data-open],[data-overs],[data-batfirst],[data-pick],[data-run],[data-wicket],[data-undo],[data-endinnings],[data-assign],[data-wide],[data-noball],[data-closemodal],[data-stop],[data-share],[data-reopen]");
+    if (!el) return;
+    const d = el.dataset;
+
+    if (d.stop !== undefined && el === e.target) {} // clicks inside modal content
+    if (d.back !== undefined) { VIEW = { name: "home" }; UI_STATE.picker=null; UI_STATE.wicketPick=false; return render(); }
+    if (d.open !== undefined) { VIEW = { name: "match", id: d.open }; return render(); }
+    if (d.overs !== undefined) { UI_STATE.overs = +d.overs; return render(); }
+    if (d.batfirst !== undefined) {
+      const fx = FIXTURES.find(f=>f.id===VIEW.id);
+      const bowlFirst = d.batfirst===fx.home?fx.away:fx.home;
+      const m = getMatch(); m.overs = UI_STATE.overs; m.innings1 = freshInnings(d.batfirst, bowlFirst, UI_STATE.overs);
+      return setMatch(m);
+    }
+    if (d.pick !== undefined) { VIEW.scrollTop = window.scrollY; UI_STATE.picker = d.pick; return render(); }
+    if (d.closemodal !== undefined) { UI_STATE.picker = null; return render(); }
+    if (d.run !== undefined) { VIEW.scrollTop = window.scrollY; recordBall({ legal:true, runs:+d.run }); return; }
+    if (d.wicket !== undefined) { VIEW.scrollTop = window.scrollY; recordWicket(); return; }
+    if (d.undo !== undefined) { VIEW.scrollTop = window.scrollY; undo(); return; }
+    if (d.endinnings !== undefined) { endInnings(); return; }
+    if (d.wide !== undefined) { UI_STATE.picker=null; VIEW.scrollTop=window.scrollY; recordBall({ legal:false, extra:1+(+d.wide) }); return; }
+    if (d.noball !== undefined) { UI_STATE.picker=null; VIEW.scrollTop=window.scrollY; recordBall({ legal:false, extra:1, runs:+d.noball }); return; }
+    if (d.assign !== undefined) {
+      const m = getMatch(); const key = m.innings2?"innings2":"innings1"; const inn = { ...m[key] };
+      inn[d.assign] = d.name; m[key] = inn; UI_STATE.picker=null; UI_STATE.wicketPick=false; VIEW.scrollTop=window.scrollY; return setMatch(m);
+    }
+    if (d.reopen !== undefined) { const m=getMatch(); m.complete=false; return setMatch(m); }
+    if (d.share !== undefined) {
+      const fx = FIXTURES.find(f=>f.id===VIEW.id); const m = getMatch();
+      const text = shareText(fx, m);
+      const wa = "https://wa.me/?text=" + encodeURIComponent(text);
+      if (navigator.share) { navigator.share({ text }).catch(()=>window.open(wa,"_blank")); }
+      else { window.open(wa, "_blank"); }
+      return;
+    }
+  };
+}
+
+// ── Boot ────────────────────────────────────────────────────────────
+load();
+render();
+</script>
+</body>
+</html>
